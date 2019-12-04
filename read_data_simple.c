@@ -64,9 +64,9 @@
 #endif
 
 /* Includes ------------------------------------------------------------------*/
+
 #include <string.h>
 #include <stdio.h>
-
 #include "stm32l4xx_hal.h"
 #include <lsm6dso_reg.h>
 //#include "gpio.h"
@@ -77,6 +77,9 @@
 #elif defined(NUCLEO_F411RE_X_NUCLEO_IKS01A2)
 //#include "usart.h"
 #endif
+
+extern I2C_HandleTypeDef hi2c1;
+extern UART_HandleTypeDef huart2;
 
 typedef union{
   int16_t i16bit[3];

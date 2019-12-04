@@ -17,7 +17,28 @@
   *
   ******************************************************************************
   */
+#define I2C_TIMING      0x00D00E28
+#define I2C_ADDRESS     0xD6
+/* Definition for USARTx clock resources */
+#define USARTx                           USART2
+#define USARTx_CLK_ENABLE()              __HAL_RCC_USART2_CLK_ENABLE()
+#define USARTx_RX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOA_CLK_ENABLE()
+#define USARTx_TX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOA_CLK_ENABLE()
 
+#define USARTx_FORCE_RESET()             __HAL_RCC_USART2_FORCE_RESET()
+#define USARTx_RELEASE_RESET()           __HAL_RCC_USART2_RELEASE_RESET()
+
+/* Definition for USARTx Pins */
+#define USARTx_TX_PIN                    GPIO_PIN_2
+#define USARTx_TX_GPIO_PORT              GPIOA
+#define USARTx_TX_AF                     GPIO_AF7_USART2
+#define USARTx_RX_PIN                    GPIO_PIN_3
+#define USARTx_RX_GPIO_PORT              GPIOA
+#define USARTx_RX_AF                     GPIO_AF7_USART2
+
+/* Definition for USARTx's NVIC IRQ and IRQ Handlers */
+#define USARTx_IRQn                      USART2_IRQn
+#define USARTx_IRQHandler                USART2_IRQHandler
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 
@@ -28,6 +49,15 @@
 /** @addtogroup GPIO_IOToggle
   * @{
   */
+
+static void Error_Handler(void)
+{
+  /* Turn LED2 to on for error */
+  BSP_LED_On(LED2); 
+  while(1)
+  {
+  }
+}
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -41,24 +71,8 @@ void SystemClock_Config(void);
 /* Private functions ---------------------------------------------------------*/
 /* I2C handler declaration */
 I2C_HandleTypeDef hi2c1;
-  /*##-1- Configure the I2C peripheral ######################################*/
-  hi2c1.Instance             = I2Cx;
-  hi2c1.Init.Timing          = I2C_TIMING;
-  hi2c1.Init.OwnAddress1     = I2C_ADDRESS;
-  hi2c1.Init.AddressingMode  = I2C_ADDRESSINGMODE_10BIT;
-  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
-  hi2c1.Init.OwnAddress2     = 0xFF;
-  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
-  hi2c1.Init.NoStretchMode   = I2C_NOSTRETCH_DISABLE;
+UART_HandleTypeDef huart2;
   
-  if(HAL_I2C_Init(&hi2c1) != HAL_OK)
-  {
-    /* Initialization Error */
-    Error_Handler();
-  }
-
-  /* Enable the Analog I2C Filter */
-  HAL_I2CEx_ConfigAnalogFilter(&hi2c1,I2C_ANALOGFILTER_ENABLE);
 
 /**
   * @brief  Main program
@@ -87,6 +101,42 @@ int main(void)
   
   /* -1- Enable each GPIO Clock (to be able to program the configuration registers) */
   LED2_GPIO_CLK_ENABLE();
+
+/*##-1- Configure the I2C peripheral ######################################*/
+hi2c1.Instance             = I2C1;
+hi2c1.Init.Timing          = I2C_TIMING;
+hi2c1.Init.OwnAddress1     = I2C_ADDRESS;
+hi2c1.Init.AddressingMode  = I2C_ADDRESSINGMODE_10BIT;
+hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+hi2c1.Init.OwnAddress2     = 0xFF;
+hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+hi2c1.Init.NoStretchMode   = I2C_NOSTRETCH_DISABLE;
+  
+if(HAL_I2C_Init(&hi2c1) != HAL_OK)
+{
+  /* Initialization Error */
+  Error_Handler();
+}
+
+
+
+/* Enable the Analog I2C Filter */
+HAL_I2CEx_ConfigAnalogFilter(&hi2c1,I2C_ANALOGFILTER_ENABLE);
+
+  huart2.Instance        = USARTx;
+  huart2.Init.BaudRate   = 9600;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits   = UART_STOPBITS_1;
+  huart2.Init.Parity     = UART_PARITY_NONE;
+  huart2.Init.HwFlowCtl  = UART_HWCONTROL_NONE;
+  huart2.Init.Mode       = UART_MODE_TX_RX;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+
+  if(HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    /* Initialization Error */
+    Error_Handler();
+  }
 
   /* -2- Configure IOs in output push-pull mode to drive external LEDs */
   GPIO_InitStruct.Mode  = GPIO_MODE_OUTPUT_PP;

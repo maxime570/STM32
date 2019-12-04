@@ -12,7 +12,7 @@ TOOLS_PATH= /home/maxime/Bureau/IMERIR-2019/gcc-arm-none-eabi-9-2019-q4-major/bi
 # STM32Cube L4 path
 STM32L4_CUBE_PATH = /home/maxime/Bureau/IMERIR-2019/en.stm32cubel4/STM32Cube_FW_L4_V1.14.0/
 
-SOURCE = main.c read_data_simple.c stm32l4xx_nucleo.c lsm6dso_reg.c
+SOURCE = main.c read_data_simple.c stm32l4xx_nucleo.c lsm6dso_reg.c stm32l4xx_hal_i2c_ex.c
 
 # path to our source code
 SOURCE_PATH = ./
